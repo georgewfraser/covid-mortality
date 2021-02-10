@@ -144,7 +144,7 @@ select
         annual_mortality_recent.population
     ) as population,
 from unnest(generate_date_array('1900-01-01', '2020-01-01', interval 1 year)) as year, 
-    unnest(['AUT', 'BEL', 'BGR', 'CAN', 'CHE', 'CHL', 'CZE', 'DEUTNP', 'DNK', 'ESP', 'EST', 'FIN', 'FRATNP', 'GBRTENW', 'GRC', 'HRV', 'HUN', 'ISL', 'ISR', 'ITA', 'KOR', 'LTU', 'LUX', 'LVA', 'NLD', 'NOR', 'NZL_NP', 'POL', 'PRT', 'SVK', 'SVN', 'SWE', 'TWN', 'USA']) as country_code,
+    unnest(['AUT', 'BEL', 'BGR', 'CHE', 'CHL', 'DEUTNP', 'DNK', 'ESP', 'EST', 'FIN', 'FRATNP', 'GBRTENW', 'HUN', 'ISL', 'ISR', 'LTU', 'LUX', 'LVA', 'NLD', 'NOR', 'NZL_NP', 'POL', 'PRT', 'SWE', 'USA']) as country_code,
     unnest(['0-14', '15-64', '65-74', '75-84', '85+']) as age_group,
     unnest(['m', 'f']) as sex
 left join `fivetran-wild-west`.mortality.annual_population_historical using (country_code, age_group, sex) 
@@ -165,9 +165,9 @@ where extract(year from year) = 2020
 order by 1
 
 -- Tableau formula
-0.164 * SUM(IF [Age Group] = '0-14' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '0-14' THEN [Population] ELSE 0 END) +
-0.650 * SUM(IF [Age Group] = '15-64' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '15-64' THEN [Population] ELSE 0 END) +
-0.103 * SUM(IF [Age Group] = '65-74' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '65-74' THEN [Population] ELSE 0 END) +
+0.171 * SUM(IF [Age Group] = '0-14' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '0-14' THEN [Population] ELSE 0 END) +
+0.644 * SUM(IF [Age Group] = '15-64' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '15-64' THEN [Population] ELSE 0 END) +
+0.102 * SUM(IF [Age Group] = '65-74' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '65-74' THEN [Population] ELSE 0 END) +
 0.059 * SUM(IF [Age Group] = '75-84' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '75-84' THEN [Population] ELSE 0 END) +
 0.024 * SUM(IF [Age Group] = '85+' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '85+' THEN [Population] ELSE 0 END)
 
