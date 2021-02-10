@@ -129,6 +129,24 @@ left join `fivetran-wild-west`.mortality.annual_mortality_recent using (country_
 where year between prev_population_date and next_population_date or prev_population_date is null
 order by country_code, year, age_group, sex;
 
+-- Age normalization constants.
+select 
+    round(sum(if(age_group = '0-14', population, 0)) / sum(population), 3),
+    round(sum(if(age_group = '15-64', population, 0)) / sum(population), 3),
+    round(sum(if(age_group = '65-74', population, 0)) / sum(population), 3),
+    round(sum(if(age_group = '75-84', population, 0)) / sum(population), 3),
+    round(sum(if(age_group = '85+', population, 0)) / sum(population), 3),
+from `fivetran-wild-west.mortality.annual_summary` 
+where extract(year from year) = 2020 
+order by 1
+
+-- Tableau formula
+0.164 * SUM(IF [Age Group] = '0-14' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '0-14' THEN [Population] ELSE 0 END) +
+0.650 * SUM(IF [Age Group] = '15-64' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '15-64' THEN [Population] ELSE 0 END) +
+0.103 * SUM(IF [Age Group] = '65-74' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '65-74' THEN [Population] ELSE 0 END) +
+0.059 * SUM(IF [Age Group] = '75-84' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '75-84' THEN [Population] ELSE 0 END) +
+0.024 * SUM(IF [Age Group] = '85+' THEN [Deaths] ELSE 0 END) / SUM(IF [Age Group] = '85+' THEN [Population] ELSE 0 END)
+
 -- Replaced by ldb = true
 -- where type = case pop_name 
 --     -- switches from O to R 2002-01-01
