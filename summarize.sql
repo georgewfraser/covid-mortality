@@ -134,7 +134,11 @@ create temp function interpolate(x date, x1 date, x2 date, y1 int64, y2 int64) a
 
 create or replace table `fivetran-wild-west.mortality.annual_summary` as
 select 
-    country_code, year, age_group, sex,
+    country_code, 
+    country_name, 
+    year, 
+    age_group, 
+    sex,
     if(annual_mortality_historical.deaths is not null, 
         annual_mortality_historical.deaths, 
         annual_mortality_recent.deaths
@@ -144,7 +148,33 @@ select
         annual_mortality_recent.population
     ) as population,
 from unnest(generate_date_array('1900-01-01', '2020-01-01', interval 1 year)) as year, 
-    unnest(['AUT', 'BEL', 'BGR', 'CHE', 'CHL', 'DEUTNP', 'DNK', 'ESP', 'EST', 'FIN', 'FRATNP', 'GBRTENW', 'HUN', 'ISL', 'ISR', 'LTU', 'LUX', 'LVA', 'NLD', 'NOR', 'NZL_NP', 'POL', 'PRT', 'SWE', 'USA']) as country_code,
+    unnest(array<struct<country_code string, country_name string>>[
+        ('AUT', 'Austria'),
+        ('BEL', 'Belarus'),
+        ('BGR', 'Bulgaria'),
+        ('CHE', 'Switzerland'),
+        ('CHL', 'Chile'),
+        ('DEUTNP', 'Germany'),
+        ('DNK', 'Denmark'),
+        ('ESP', 'Spain'),
+        ('EST', 'Estonia'),
+        ('FIN', 'Finland'),
+        ('FRATNP', 'France'),
+        ('GBRTENW', 'England'),
+        ('HUN', 'Hungary'),
+        ('ISL', 'Iceland'),
+        ('ISR', 'Israel'),
+        ('LTU', 'Lithuania'),
+        ('LUX', 'Luxembourg'),
+        ('LVA', 'Latvia'),
+        ('NLD', 'Netherlands'),
+        ('NOR', 'Norway'),
+        ('NZL_NP', 'New Zealand'),
+        ('POL', 'Poland'),
+        ('PRT', 'Portugal'),
+        ('SWE', 'Sweden'),
+        ('USA', 'USA')
+    ]),
     unnest(['0-14', '15-64', '65-74', '75-84', '85+']) as age_group,
     unnest(['m', 'f']) as sex
 left join `fivetran-wild-west`.mortality.annual_population_historical using (country_code, age_group, sex) 
