@@ -30,6 +30,30 @@ where sex in ('m', 'f')
 group by 1, 2, 3, 4
 order by 1, 2, 3, 4;
 
+create or replace table `fivetran-wild-west.mortality.weekly_mortality_recent` as
+select 
+    country_code,
+    date,
+    age_group,
+    sex,
+    cast(sum(deaths) as int64) as deaths,
+    cast(avg(implied_population(deaths, death_rate)) as int64) as population,
+from `fivetran-wild-west`.mortality.stmf
+join unnest(array<struct<age_group string, deaths float64, death_rate float64>>[
+    ('0-14', d0_14, r0_14), 
+    ('15-64', d15_64, r15_64), 
+    ('65-74', d65_74, r65_74), 
+    ('75-84', d75_84, r75_84), 
+    ('85+', d85p, r85p)
+])
+join (
+    select extract(isoyear from date) as year, extract(isoweek from date) as week, date
+    from unnest(generate_date_array('1990-01-01', '2021-01-01', interval 1 week)) as date
+) as iso_weeks using (year, week)
+where sex in ('m', 'f')
+group by 1, 2, 3, 4
+order by 1, 2, 3, 4;
+
 create temp function parse_age(i string) as (
     case i 
         when 'UNK' then null 
